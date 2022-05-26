@@ -27,6 +27,9 @@ class Game:
         if abs(self.snake.x[0] -  self.apple.x) < SIZE and abs(self.snake.y[0] -  self.apple.y) < SIZE:
             self.apple.change_apple()
             self.snake.append_block()
+            # print(self.check_if_apple_valid_position())
+            while not self.check_if_apple_valid_position():
+                self.apple.change_apple()
 
     def pause(self):
         while True:
@@ -34,7 +37,14 @@ class Game:
                 if event.type == QUIT:
                     pygame.quit()
                 if event.type == KEYDOWN and event.key == K_p:
-                    return 
+                    return True
+    
+    def check_if_apple_valid_position(self):
+        for i in range(self.snake.length):
+            print(self.snake.x[i],self.apple.x,self.snake.y[i],self.apple.y)
+            if self.snake.x[i] == self.apple.x and self.snake.y[i] == self.apple.y:
+                return False
+        return True
 
     def run(self):
         running = True
@@ -61,7 +71,7 @@ class Game:
                     running = False
             #print(self.snake.direction)
             time.sleep(TIME)
-            self.check_colision() 
+            self.check_colision()
             self.snake.set_direction()  
             self.next_move()
             
@@ -87,38 +97,32 @@ class Snake():
             self.parent_screen.blit(self.block, (self.x[k], self.y[k]))
         pygame.display.update()
     
-    def move_right(self, block_id):
-        self.x[block_id] += self.speed
+    def move_right(self):
+        self.x[0] += self.speed
 
-    def move_left(self, block_id):
-        self.x[block_id] -= self.speed
+    def move_left(self):
+        self.x[0] -= self.speed
 
-    def move_up(self, block_id):
-        self.y[block_id] -= self.speed
+    def move_up(self):
+        self.y[0] -= self.speed
 
-    def move_down(self, block_id):
-        self.y[block_id] += self.speed
+    def move_down(self):
+        self.y[0] += self.speed
 
     def set_direction(self):
-        print(self.x)
-        print(range(self.length))
         for block_id in reversed(range(self.length)):
-            print(block_id)
             if block_id == 0:
-                self.all_directions[0] = self.direction
+                if self.direction == "right":
+                    self.move_right()
+                if self.direction == "left":
+                    self.move_left()
+                if self.direction == "up":
+                    self.move_up()
+                if self.direction == "down":
+                    self.move_down()
             else:
-                if block_id == 3:
-                    print(self.all_directions[block_id-1])
-                self.all_directions[block_id] = self.all_directions[block_id-1]
-            if self.all_directions[block_id] == "right":
-                self.move_right(block_id)
-            if self.all_directions[block_id] == "left":
-                self.move_left(block_id)
-            if self.all_directions[block_id] == "up":
-                self.move_up(block_id)
-            if self.all_directions[block_id] == "down":
-                self.move_down(block_id)
-        print(self.x)
+                self.x[block_id]=self.x[block_id-1]
+                self.y[block_id]=self.y[block_id-1]
 
     def append_block(self):
         self.length += 1
@@ -131,13 +135,13 @@ class Apple():
         self.parent_screen = parent_screen
         self.apple = pygame.image.load("images/apple-removebg-preview.png").convert_alpha()
         self.apple = pygame.transform.scale(self.apple, (SIZE, SIZE))
-        self.x = 0
-        self.y = 0
+        self.x = 10
+        self.y = 10
         
     def change_apple(self):
         #self.parent_screen.fill((85, 235, 52))
-        self.x = randint(0, 8)*30
-        self.y = randint(0, 8)*30
+        self.x = randint(0, 8)*30+10
+        self.y = randint(0, 8)*30+10
 
     def draw(self):
         self.parent_screen.blit(self.apple, (self.x, self.y))
